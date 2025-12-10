@@ -1,0 +1,41 @@
+name: Build Site
+
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Frontend
+      uses: actions/checkout@v4
+      with:
+        repository: uwm-cs557-fa2025-group-6/frontend
+        ssh-key: ${{ secrets.FRONTEND_DEPLOY_KEY }}
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-verison: ">=20"
+        cache: npm
+    - name: Install
+      run: npm ci
+    - name: Build
+      run: npm run build
+    - name: Duplicate Index as 404
+      run: |
+        cd dist
+        cp index.html 404.html
+    - name: Init Repo and Commit
+      run: |
+        cd dist
+        git init
+        git add -A
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git commit -m 'deploy'
+    - name: Push
+      uses: ad-m/github-push-action@v0.8.0
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: gh-pages
+        force: true
+        directory: ./dist
