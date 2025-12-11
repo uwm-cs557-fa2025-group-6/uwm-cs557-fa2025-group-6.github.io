@@ -24,6 +24,9 @@ jobs:
       run: |
         cd dist
         cp index.html 404.html
+    - name: Skip jekyll
+      run: |
+        touch .nojekyll
     - name: Init Repo and Commit
       run: |
         cd dist
